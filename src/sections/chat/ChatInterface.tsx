@@ -1,4 +1,4 @@
-import  { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface Conversation {
@@ -17,7 +17,7 @@ interface Props {
   onBack: () => void;
 }
 
-const ChatInterface = ({   }: Props) => {
+const ChatInterface = ({}: Props) => {
   const navigate = useNavigate();
   // Test conversations and messages
   const [conversations] = useState<Conversation[]>([
@@ -42,7 +42,6 @@ const ChatInterface = ({   }: Props) => {
       preview: "Growth journey...",
     },
   ]);
-  
 
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -82,7 +81,7 @@ const ChatInterface = ({   }: Props) => {
   return (
     <div className="flex h-screen bg-[#0A0A0A]">
       {/* Sidebar */}
-      <div className="w-80 bg-[#111111] border-r border-gray-800">
+      <div className="w-80 border-r border-gray-800">
         <div className="p-4 border-b border-gray-800">
           <h1 className="text-xl font-bold text-white">Mindful AI</h1>
         </div>
@@ -122,20 +121,6 @@ const ChatInterface = ({   }: Props) => {
             <h2 className="text-xl font-bold text-white">
               Your AI Companion for Mental Wellness
             </h2>
-          </div>
-          <div className="flex gap-4">
-            <a href="#" className="text-gray-400 hover:text-white">
-              Home
-            </a>
-            <a href="#" className="text-gray-400 hover:text-white">
-              About
-            </a>
-            <a href="#" className="text-gray-400 hover:text-white">
-              Contact
-            </a>
-            <button className="bg-purple-600 text-white px-4 py-1 rounded-md">
-              Get Started
-            </button>
           </div>
         </div>
 
