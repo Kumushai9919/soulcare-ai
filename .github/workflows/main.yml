@@ -39,7 +39,7 @@ jobs:
       - name: 📤 Deploy to Production Domain
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          host: ${{ secrets.PROD_HOST }}  # Use your production server's host
+          server: ${{ secrets.PROD_HOST }}  # Use your production server's host
           username: ${{ secrets.PROD_USERNAME }}  # Use your production server's username
           password: ${{ secrets.PROD_PASSWORD }}  # Use your production server's password
           local-dir: ./dist/  

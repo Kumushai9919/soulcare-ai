@@ -39,7 +39,7 @@ jobs:
       - name: 📤 Deploy to Test Domain 
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          host: ${{ secrets.DEV_HOST }}  # Use your dev server's host
+          server: ${{ secrets.DEV_HOST }}  # Use your dev server's host
           username: ${{ secrets.DEV_USERNAME }}  # Use your dev server's username
           password: ${{ secrets.DEV_PASSWORD }}  # Use your dev server's password 
           local-dir: ./dist/  
