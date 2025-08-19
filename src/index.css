@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root {
+  --background: #0A0A0A;
+}
+
+body {
+  color: #ffffff;
+  background: var(--background);
+  margin: 0;
+  padding: 0;
+}
+
+.hero-section {
+  background: linear-gradient(95.63deg, #B44BF2 7.41%, #7B68EE 93.63%);
+  border-radius: 24px;
+  padding: 64px;
+  box-shadow: 0 0 40px rgba(180, 75, 242, 0.2);
+}
+
+.button-primary {
+  background: #B44BF2;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.button-primary:hover {
+  background: #9333EA;
+}
+
+.story-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 24px;
+  transition: transform 0.2s ease;
+}
+
+.story-card:hover {
+  transform: translateY(-4px);
+}

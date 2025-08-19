@@ -1,0 +1,47 @@
+name: Deploy to Production Domain
+
+on:
+  push:
+    branches:
+      - main  # Trigger when pushing to 'main' branch
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          version: 10
+          run_install: false
+          
+      # Step 2: Setup Node.js
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      # Step 3: Install dependencies
+      - name: 📦 Install Dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      # Step 4: Build the project
+      - name: 🛠️ Build Project
+        run: pnpm run build  # Generates production-ready files in 'dist/' folder
+
+      # Step 5: Deploy to the server
+      - name: 📤 Deploy to Production Domain
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          host: ${{ secrets.PROD_HOST }}  # Use your production server's host
+          username: ${{ secrets.PROD_USERNAME }}  # Use your production server's username
+          password: ${{ secrets.PROD_PASSWORD }}  # Use your production server's password
+          local-dir: ./dist/  
+          server-dir: ./
+            
