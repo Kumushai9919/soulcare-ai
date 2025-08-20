@@ -43,10 +43,10 @@ const TestResults = ({ score, analysis, onStartChat }: TestResultsProps) => {
   const suggestions = getSuggestions(score);
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto p-6 mb-36 font-mono">
       <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-100">
         <h2 className="text-3xl font-bold mb-8 text-gray-800 bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
-          Your Results
+          Your Stress Assessment Results
         </h2>
         
         {/* Stress Level Indicator */}
@@ -63,39 +63,41 @@ const TestResults = ({ score, analysis, onStartChat }: TestResultsProps) => {
           </div>
         </div>
 
-        {/* AI Analysis */}
+        {/* AI Analysis - More Compact */}
         <div className="mb-8">
-          <h3 className="text-xl font-semibold mb-4 text-gray-800">AI Analysis</h3>
+          <h3 className="text-xl font-semibold mb-4 text-gray-800">Summary</h3>
           <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
             <div className="prose prose-gray max-w-none">
-              {analysis.split('\n\n').map((paragraph, idx) => (
+              {analysis.split('\n\n').slice(0, 2).map((paragraph, idx) => (
                 <p key={idx} className="text-gray-600 mb-4 last:mb-0">
-                  {paragraph}
+                  {paragraph.replace(/\*\*/g, '')}
                 </p>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Suggestions */}
+        {/* Suggestions with Matching Style */}
         <div className="mb-8">
-          <h3 className="text-xl font-semibold mb-4 text-gray-800">Suggested Topics for Discussion</h3>
+          <h3 className="text-xl font-semibold mb-4 text-gray-800">Recommended Topics</h3>
           <div className="space-y-3">
             {suggestions.map((suggestion, index) => (
               <button
                 key={index}
                 onClick={() => navigate('/chat', { state: { topic: suggestion }})}
-                className="w-full text-left p-4 rounded-xl transition-all duration-200 
-                  border-2 border-transparent hover:border-purple-500
-                  bg-gradient-to-r from-gray-50 to-white
-                  hover:from-purple-50 hover:to-pink-50
-                  text-gray-700 hover:text-gray-900
-                  shadow-sm hover:shadow-md
-                  relative overflow-hidden group"
+                className="w-full text-left p-4 rounded-xl transition-all duration-300
+                  relative overflow-hidden group
+                  border-2 border-transparent
+                  [background-clip:padding-box,border-box] 
+                  [background-origin:padding-box,border-box] 
+                  bg-[linear-gradient(white,white),linear-gradient(110deg,rgba(67,56,202,0.2),rgba(192,38,211,0.2),rgba(225,29,72,0.2))]
+                  hover:bg-[linear-gradient(rgba(67,56,202,0.05),rgba(192,38,211,0.05)),linear-gradient(110deg,rgba(67,56,202,0.8),rgba(192,38,211,0.8),rgba(225,29,72,0.8))]
+                  text-gray-700 hover:text-white
+                  shadow-sm hover:shadow-md"
               >
-                <span className="relative z-10">{suggestion}</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-pink-600/10 
-                  opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                <span className="relative z-10 transition-colors duration-300">
+                  {suggestion}
+                </span>
               </button>
             ))}
           </div>
