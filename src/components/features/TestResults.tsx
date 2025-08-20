@@ -16,14 +16,27 @@ const TestResults = ({ score, analysis, onStartChat }: TestResultsProps) => {
   };
 
   const getSuggestions = (score: number) => {
-    const suggestions = [
-      'Stress Management Techniques',
-      'Work-Life Balance',
-      'Sleep Quality Improvement',
-      'Anxiety Management',
-      'Mindfulness Practices'
-    ];
-    return suggestions.slice(0, 3);
+    const allSuggestions = {
+      low: [
+        'Maintaining Mental Wellness',
+        'Preventive Self-Care',
+        'Personal Growth'
+      ],
+      moderate: [
+        'Stress Management Techniques',
+        'Work-Life Balance',
+        'Sleep Quality Improvement'
+      ],
+      high: [
+        'Anxiety Management',
+        'Stress Relief Techniques',
+        'Mindfulness Practices'
+      ]
+    };
+
+    if (score < 30) return allSuggestions.low;
+    if (score < 60) return allSuggestions.moderate;
+    return allSuggestions.high;
   };
 
   const { level, color, gradient } = getStressLevel(score);
