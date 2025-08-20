@@ -8,15 +8,14 @@ const Navbar = () => {
         <span className="text-xl font-bold">Soulcare</span>
       </Link>
       <div className="flex items-center gap-8">
-        <Link to="/" className="text-gray-300 hover:text-white">
-          Home
-        </Link>
-        <Link to="/about" className="text-gray-300 hover:text-white">
-          About
-        </Link>
-        <Link to="/contact" className="text-gray-300 hover:text-white">
+         
+        <a
+          href="mailto:kumushjj@gmail.com"
+          className="text-gray-300 hover:text-white"
+          title="kumushjj@gmail.com"
+        >
           Contact
-        </Link>
+        </a>
         <Link to="/chat" className="button-primary">
           Get Started
         </Link>

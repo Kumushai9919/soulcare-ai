@@ -123,7 +123,7 @@ const ChatInterface = ({}: Props) => {
   return (
     <div className="flex h-screen bg-[#0A0A0A] pt-6">  
       {/* Sidebar */}
-      <div className="w-80 border-r border-gray-800 fixed top-16 bottom-0">  
+      <div className="w-80 border-r border-gray-800 fixed top-6 bottom-0">  
         <div className="p-4 border-b border-gray-800">
           <h1 className="text-xl font-bold text-white">Mindful AI</h1>
         </div>
