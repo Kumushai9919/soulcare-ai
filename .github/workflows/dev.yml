@@ -3,7 +3,7 @@ name: Deploy to Test Domain
 on:
   push:
     branches:
-      - dev  # Trigger when pushing to 'dev' branch
+      - dev  
 
 jobs:
   build-and-deploy:
@@ -33,15 +33,15 @@ jobs:
 
       # Step 4: Build the project
       - name: 🛠️ Build Project
-        run: pnpm run build  # Generates production-ready files in 'dist/' folder
+        run: pnpm run build   
 
       # Step 5: Deploy to the server
       - name: 📤 Deploy to Test Domain 
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.DEV_HOST }}  # Use your dev server's host
-          username: ${{ secrets.DEV_USERNAME }}  # Use your dev server's username
-          password: ${{ secrets.DEV_PASSWORD }}  # Use your dev server's password 
+          server: ${{ secrets.DEV_HOST }}  
+          username: ${{ secrets.DEV_USERNAME }}   
+          password: ${{ secrets.DEV_PASSWORD }}  
           local-dir: ./dist/  
           server-dir: ./
  
