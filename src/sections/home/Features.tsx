@@ -1,4 +1,4 @@
-import { useState } from 'react'; 
+import { useState, useRef } from 'react'; 
 import Hero from './Hero';
 import StressTest from '../../components/features/StressTest';
 import TestResults from '../../components/features/TestResults';
@@ -11,7 +11,16 @@ type FeaturesProps = {
 export default function Features({ onStartChat }: FeaturesProps) {
   const [showTest, setShowTest] = useState(false);
   const [testScore, setTestScore] = useState<number | null>(null);
+  const [analysis, setAnalysis] = useState<string>('');
+  const testSectionRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  const handleStartTest = () => {
+    setShowTest(true);
+    setTimeout(() => {
+      testSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+  };
 
   return (
     <div className="max-w-6xl mx-auto px-8 py-12">
@@ -19,7 +28,7 @@ export default function Features({ onStartChat }: FeaturesProps) {
 
       {/* Stress Assessment Button */}
       <div className="text-center mt-8">
-        <button onClick={() => setShowTest(true)} className="button-primary">
+        <button onClick={handleStartTest} className="button-primary">
           Take Stress Assessment
         </button>
       </div>
@@ -40,19 +49,23 @@ export default function Features({ onStartChat }: FeaturesProps) {
       </div>
 
       {/* Stress Test Component */}
-      {showTest && testScore === null && (
-        <StressTest
-          onComplete={(score) => {
-            setTestScore(score);
-            setShowTest(false);
-          }}
-        />
-      )}
+      <div ref={testSectionRef}>
+        {showTest && testScore === null && (
+          <StressTest
+            onComplete={(score, analysisResult) => {
+              setTestScore(score);
+              setAnalysis(analysisResult);
+              setShowTest(false);
+            }}
+          />
+        )}
+      </div>
 
       {/* Test Results Component */}
       {testScore !== null && (
         <TestResults
           score={testScore}
+          analysis={analysis}
           onStartChat={onStartChat}
         />
       )}

@@ -3,7 +3,7 @@ name: Deploy to Production Domain
 on:
   push:
     branches:
-      - main  # Trigger when pushing to 'main' branch
+      - main 
 
 jobs:
   build-and-deploy:
@@ -33,15 +33,15 @@ jobs:
 
       # Step 4: Build the project
       - name: 🛠️ Build Project
-        run: pnpm run build  # Generates production-ready files in 'dist/' folder
+        run: pnpm run build  
 
       # Step 5: Deploy to the server
       - name: 📤 Deploy to Production Domain
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.PROD_HOST }}  # Use your production server's host
-          username: ${{ secrets.PROD_USERNAME }}  # Use your production server's username
-          password: ${{ secrets.PROD_PASSWORD }}  # Use your production server's password
+          server: ${{ secrets.PROD_HOST }} 
+          username: ${{ secrets.PROD_USERNAME }}   
+          password: ${{ secrets.PROD_PASSWORD }}  
           local-dir: ./dist/  
           server-dir: ./
             

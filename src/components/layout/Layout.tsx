@@ -1,15 +1,18 @@
 import Footer from "./Footer";
 import Navbar from "./Navbar";
 import { Outlet } from "react-router-dom";
+import { useLayout } from "../../context/LayoutContext";
 
 const Layout = () => {
+  const { showFooter } = useLayout();
+
   return (
-    <div>
+    <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="flex-1">
+      <div className={`flex-1 ${!showFooter ? 'h-screen' : ''}`}>
         <Outlet />
-      </main>
-      <Footer />
+      </div>
+      {showFooter && <Footer />}
     </div>
   );
 };
