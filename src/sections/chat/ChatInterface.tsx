@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import {
   generateChatResponse,
   generateTopicResponse,
@@ -15,8 +15,7 @@ interface Props {
 }
 
 const ChatInterface = ({}: Props) => {
-  const location = useLocation();
-  const navigate = useNavigate();
+  const location = useLocation(); 
   const topic = location.state?.topic;
 
   // Initialize sidebar state from navigation
@@ -49,8 +48,7 @@ const ChatInterface = ({}: Props) => {
   const [input, setInput] = useState("");
   const [showToast, setShowToast] = useState(false);
 
-  useEffect(() => {
-    const remaining = getRemainingRequests();
+  useEffect(() => { 
     setShowToast(true);
   }, []);
 
