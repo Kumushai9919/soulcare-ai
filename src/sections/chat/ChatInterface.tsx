@@ -217,30 +217,30 @@ const ChatInterface = ({}: Props) => {
         </div>
 
         {/* Main Chat Area */}
-        <div
-          className={`flex-1 flex flex-col transition-all duration-300
-        ${isSidebarOpen ? "ml-80" : "ml-10"}`}
-        >
-          {/* Header */}
-          <div className="flex justify-between items-center mx-2 p-2 border-b border-gray-800">
-            <h2 className="hidden sm:block text-base sm:text-xl font-bold text-white">
+        <div className={`flex-1 flex flex-col transition-all duration-300
+          ${isSidebarOpen ? 'ml-80' : 'ml-10'}`}>
+          {/* Fixed Header */}
+          <div className={`fixed top-6 right-0 z-40 flex justify-between items-center px-4 py-3 
+            border-b border-gray-800 bg-[#0A0A0A] transition-all duration-300
+            ${isSidebarOpen ? 'left-80' : 'left-10'}`}>
+            <h2 className="hidden sm:block text-base sm:text-xl font-bold text-white truncate">
               Your AI Companion for Mental Wellness
             </h2>
-            <Link to="/" className="flex flex-col items-start gap-2">
+            <Link to="/" className="flex-shrink-0">
               <img
                 src="/soul2.png"
                 alt="Soulcare Logo"
-                className="h-10 sm:h-14 w-auto hover:opacity-80 transition-opacity "
+                className="h-8 sm:h-10 w-auto hover:opacity-80 transition-opacity"
               />
             </Link>
           </div>
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {/* Messages - Add top padding to account for fixed header */}
+          <div className="flex-1 overflow-y-auto pt-16 px-4 pb-20">
             {messages.map((message, index) => (
               <div
                 key={index}
-                className={`flex ${
+                className={`flex ${index === 0 ? 'mt-6' : ''} ${
                   message.role === "user" ? "justify-end" : "justify-start"
                 }`}
               >
@@ -280,34 +280,33 @@ const ChatInterface = ({}: Props) => {
             )}
           </div>
 
-          {/* Input Area */}
-          <div
-            className={`fixed bottom-0 right-0 p-4 border-t border-gray-800 
-        bg-[#0A0A0A] transition-all duration-300
-        ${isSidebarOpen ? "left-80" : "left-0"}`}
-          >
-            <div className="max-w-4xl mx-auto relative">
+          {/* Fixed Input Area */}
+          <div className={`fixed bottom-0 right-0 p-4 border-t border-gray-800 
+          bg-[#0A0A0A] transition-all duration-300
+          ${isSidebarOpen ? 'left-80' : 'left-0'}`}>
+            <div className="max-w-4xl mx-auto flex items-center gap-2">
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleSend()}
                 placeholder="Type your message..."
-                className="w-full bg-[#1E1E1E] text-white rounded-xl px-4 py-3 pr-20 focus:outline-none focus:ring-2 focus:ring-purple-600 text-xs sm:text-base"
+                className="flex-1 bg-[#1E1E1E] text-white rounded-xl px-4 py-3 
+                focus:outline-none focus:ring-2 focus:ring-purple-600 
+                text-xs sm:text-base"
                 disabled={isLoading}
               />
               <button
                 onClick={handleSend}
                 disabled={isLoading}
-                className={`absolute right-2 top-1/2 transform -translate-y-1/2 bg-purple-600 text-white px-4 py-1 rounded-lg text-xs sm:text-base ${
-                  isLoading
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-purple-700"
-                }`}
+                className={`flex-shrink-0 bg-purple-600 text-white px-4 py-3 
+                rounded-xl text-xs sm:text-base transition-colors
+                ${isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-purple-700"}`}
               >
                 Send
               </button>
             </div>
+
           </div>
         </div>
       </div>
