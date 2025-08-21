@@ -43,15 +43,15 @@ const TestResults = ({ score, analysis, onStartChat }: TestResultsProps) => {
   const suggestions = getSuggestions(score);
 
   return (
-    <div className="max-w-7xl mx-auto p-6 mb-36 font-mono">
-      <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-100">
-        <h2 className="text-3xl font-bold mb-8 text-gray-800 bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
+    <div className="max-w-7xl mx-auto p-4 sm:p-6 mb-36 font-mono">
+      <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xl border border-gray-100">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6 sm:mb-8 text-gray-800 bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
           Your Stress Assessment Results
         </h2>
         
         {/* Stress Level Indicator */}
-        <div className="mb-8">
-          <p className="text-xl text-gray-700">
+        <div className="mb-6 sm:mb-8">
+          <p className="text-md sm:text-2xl text-gray-700">
             Your stress level is: 
             <span className={`font-bold ml-2 ${color}`}>{level}</span>
           </p>
@@ -64,12 +64,12 @@ const TestResults = ({ score, analysis, onStartChat }: TestResultsProps) => {
         </div>
 
         {/* AI Analysis - More Compact */}
-        <div className="mb-8">
-          <h3 className="text-xl font-semibold mb-4 text-gray-800">Summary</h3>
-          <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
+        <div className="mb-6 sm:mb-8">
+          <h3 className="text-md sm:text-xl font-semibold mb-4 text-gray-800">Summary</h3>
+          <div className="bg-gray-50 rounded-xl p-4 sm:p-6 border border-gray-100">
             <div className="prose prose-gray max-w-none">
               {analysis.split('\n\n').slice(0, 2).map((paragraph, idx) => (
-                <p key={idx} className="text-gray-600 mb-4 last:mb-0">
+                <p key={idx} className="text-sm sm:text-base text-gray-600 mb-4 last:mb-0">
                   {paragraph.replace(/\*\*/g, '')}
                 </p>
               ))}
@@ -79,12 +79,17 @@ const TestResults = ({ score, analysis, onStartChat }: TestResultsProps) => {
 
         {/* Suggestions with Matching Style */}
         <div className="mb-8">
-          <h3 className="text-xl font-semibold mb-4 text-gray-800">Recommended Topics</h3>
+          <h3 className="text-md sm:text-2xl font-semibold mb-4 text-gray-800">Recommended Topics</h3>
           <div className="space-y-3">
             {suggestions.map((suggestion, index) => (
               <button
                 key={index}
-                onClick={() => navigate('/chat', { state: { topic: suggestion }})}
+                onClick={() => navigate('/chat', { 
+                  state: { 
+                    topic: suggestion,
+                    sidebarOpen: false // Add this to control initial sidebar state
+                  }
+                })}
                 className="w-full text-left p-4 rounded-xl transition-all duration-300
                   relative overflow-hidden group
                   border-2 border-transparent
@@ -95,7 +100,7 @@ const TestResults = ({ score, analysis, onStartChat }: TestResultsProps) => {
                   text-gray-700 hover:text-white
                   shadow-sm hover:shadow-md"
               >
-                <span className="relative z-10 transition-colors duration-300">
+                <span className="relative z-10 transition-colors duration-300 text-xs sm:text-base">
                   {suggestion}
                 </span>
               </button>
@@ -111,7 +116,9 @@ const TestResults = ({ score, analysis, onStartChat }: TestResultsProps) => {
               bg-gradient-to-r from-purple-600 to-pink-500 
               hover:from-purple-700 hover:to-pink-600
               transform transition-all duration-200
-              hover:shadow-lg hover:scale-[1.02]"
+              hover:shadow-lg hover:scale-[1.02]
+              
+              "
           >
             Chat with AI Therapist
           </button>

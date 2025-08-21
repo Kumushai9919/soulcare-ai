@@ -58,10 +58,10 @@ export default function Hero({ onStartChat }: FeaturesProps) {
   };
 
   return (
-    <div className="relative">
-      <div className="container mx-auto px-4">
+    <div className="relative min-h-screen overflow-y-auto p-4">
+      <div className="container mx-auto px-4 pb-8">
         <motion.div
-          className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center"
+          className="min-h-screen py-16 flex flex-col items-center justify-center"
           variants={containerVariants}
           initial="hidden"
           animate="show"
@@ -71,13 +71,13 @@ export default function Hero({ onStartChat }: FeaturesProps) {
             <motion.img
               src="/soul2.png"
               alt="Soulcare Logo"
-              className="h-96 mx-auto mb-6"
+              className="h-48 sm:h-96 mx-auto mb-6"
               initial={{ scale: 0.8, opacity: 0, y: -100 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               transition={{ duration: 1 }}
             />
             <motion.h1
-              className="text-3xl font-medium text-white/80 font-mono tracking-wide"
+              className="text-lg sm:text-3xl font-medium text-white/80 font-mono tracking-wide text-center"
               variants={itemVariants}
             >
               Welcome to Soulcare
@@ -85,29 +85,25 @@ export default function Hero({ onStartChat }: FeaturesProps) {
           </motion.div>
 
           {/* Value Proposition */}
-          <motion.div
-            className="mb-8 w-full bg-gradient-to-br hero-section font-mono p-8 rounded-2xl backdrop-blur-sm"
-            variants={itemVariants}
-          >
-            <motion.h2
-              className="text-4xl font-bold mb-4 bg-gradient-to-r text-white" 
-            >
+          <motion.div className="mb-8 w-full bg-gradient-to-br hero-section font-mono p-4 sm:p-8 rounded-2xl backdrop-blur-sm" variants={itemVariants}>
+            <motion.h2 className="text-xl sm:text-4xl font-bold mb-4 bg-gradient-to-r text-white text-center">
               Your AI Companion for Mental Wellness
             </motion.h2>
-            <motion.p
-              className="text-lg text-gray-300 mb-8" 
-            >
+            <motion.p className="text-sm sm:text-lg text-gray-300 mb-8 text-center">
               Experience personalized support and guidance to help you navigate
               life's challenges and achieve emotional well-being.
             </motion.p>
 
-            <motion.div
-              className="flex flex-wrap gap-4" 
-            >
+            <motion.div className="flex flex-wrap gap-4">
               <motion.button
-                onClick={() => navigate("/chat")}
-                className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 
-                  rounded-xl text-white font-medium text-lg
+                onClick={() => navigate("/chat", { 
+                  state: { 
+                    sidebarOpen: false,
+                    fromHome: true // Add flag to identify navigation source
+                  }
+                })}
+                className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-purple-600 to-pink-600 
+                  rounded-xl text-white font-medium text-sm sm:text-lg
                   hover:from-purple-700 hover:to-pink-700 
                   transform transition-all duration-200
                   hover:scale-105 shadow-lg"
@@ -119,8 +115,8 @@ export default function Hero({ onStartChat }: FeaturesProps) {
 
               <motion.button
                 onClick={handleStartTest}
-                className="px-8 py-4 border-4 border-purple-600
-                  rounded-xl text-gray-300 font-medium
+                className="px-6 sm:px-8 py-3 sm:py-4 border-4 border-purple-600
+                  rounded-xl text-gray-300 font-medium text-sm sm:text-lg
                   hover:bg-purple-500/10 hover:text-white hover:border-purple-600
                   transition-all duration-200"
                 whileHover={{ scale: 1.05 }}
@@ -133,7 +129,7 @@ export default function Hero({ onStartChat }: FeaturesProps) {
         </motion.div>
 
         {/* Test Sections */}
-        <div className="w-full mb-8" ref={testSectionRef}>
+        <div className="w-full" ref={testSectionRef}>
           {showTest && testScore === null && (
             <motion.div
               variants={testVariants}

@@ -11,12 +11,12 @@ const Navbar = () => {
          
         <a
           href="mailto:kumushjj@gmail.com"
-          className="text-gray-300 hover:text-white"
+          className="text-gray-300 hover:text-white hidden sm:block"
           title="kumushjj@gmail.com"
         >
           Contact
         </a>
-        <Link to="/chat" className="button-primary">
+        <Link to="/chat" className="button-primary hidden sm:block">
           Get Started
         </Link>
       </div>

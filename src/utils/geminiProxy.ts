@@ -1,4 +1,4 @@
-const MAX_DAILY_REQUESTS = 5;
+const MAX_DAILY_REQUESTS = 10;
 
 const checkDailyLimit = (): boolean => {
   const today = new Date().toDateString();
@@ -82,5 +82,16 @@ export const generateTopicResponse = async (topic: string): Promise<string> => {
     console.error("Gemini Proxy Error:", error);
     return "I'd be happy to discuss " + topic + " with you. How would you like to start?";
   }
+};
+
+export const getRemainingRequests = (): number => {
+  const today = new Date().toDateString();
+  const usageData = JSON.parse(localStorage.getItem('apiUsage') || '{}');
+  
+  if (usageData.date !== today) {
+    return MAX_DAILY_REQUESTS;
+  }
+  
+  return MAX_DAILY_REQUESTS - (usageData.count || 0);
 };
 

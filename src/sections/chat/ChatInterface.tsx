@@ -1,21 +1,41 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { generateChatResponse, generateTopicResponse } from "../../utils/geminiProxy";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import {
+  generateChatResponse,
+  generateTopicResponse,
+  getRemainingRequests,
+} from "../../utils/geminiProxy";
 import { saveChat, getAllChats, createNewChat } from "../../utils/chatStorage";
 import type { Message, Conversation } from "../../type/chat";
+import { HiMenuAlt2 } from "react-icons/hi";
+import Toast from "../../components/Toast";
 
 interface Props {
   onBack: () => void;
 }
 
 const ChatInterface = ({}: Props) => {
-  const navigate = useNavigate();
   const location = useLocation();
+  const navigate = useNavigate();
   const topic = location.state?.topic;
+
+  // Initialize sidebar state from navigation
+  const [isSidebarOpen, setIsSidebarOpen] = useState(
+    location.state?.sidebarOpen ?? true
+  );
+
+  // Reset scroll position on mount
+  useEffect(() => {
+    if (location.state?.fromHome) {
+      window.scrollTo(0, 0);
+    }
+  }, []);
 
   const [isLoading, setIsLoading] = useState(false);
   const [currentChat, setCurrentChat] = useState<Conversation>(createNewChat());
-  const [conversations, setConversations] = useState<Conversation[]>(() => getAllChats());
+  const [conversations, setConversations] = useState<Conversation[]>(() =>
+    getAllChats()
+  );
 
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -27,6 +47,12 @@ const ChatInterface = ({}: Props) => {
   ]);
 
   const [input, setInput] = useState("");
+  const [showToast, setShowToast] = useState(false);
+
+  useEffect(() => {
+    const remaining = getRemainingRequests();
+    setShowToast(true);
+  }, []);
 
   useEffect(() => {
     const initializeTopicChat = async () => {
@@ -34,11 +60,13 @@ const ChatInterface = ({}: Props) => {
         setIsLoading(true);
         try {
           const response = await generateTopicResponse(topic);
-          setMessages([{
-            role: "assistant",
-            content: response,
-            timestamp: new Date(),
-          }]);
+          setMessages([
+            {
+              role: "assistant",
+              content: response,
+              timestamp: new Date(),
+            },
+          ]);
         } catch (error) {
           console.error("Topic initialization error:", error);
         } finally {
@@ -121,123 +149,171 @@ const ChatInterface = ({}: Props) => {
   };
 
   return (
-    <div className="flex h-screen bg-[#0A0A0A] pt-6">  
-      {/* Sidebar */}
-      <div className="w-80 border-r border-gray-800 fixed top-6 bottom-0">  
-        <div className="p-4 border-b border-gray-800">
-          <h1 className="text-xl font-bold text-white">Mindful AI</h1>
-        </div>
-        <div className="p-4">
+    <>
+      <Toast
+        message={`You have ${getRemainingRequests()} daily AI chat requests remaining.`}
+        isVisible={showToast}
+        onClose={() => setShowToast(false)}
+      />
+      <div className="flex h-screen bg-[#0A0A0A] pt-6 overflow-hidden">
+        {/* Sidebar */}
+        <div
+          className={`w-80 border-r border-gray-800 fixed top-6 bottom-0 
+        transition-all duration-300 overflow-hidden
+        ${isSidebarOpen ? "left-0" : "-left-[calc(320px-2.5rem)]"}`}
+        >
+          {/* Sidebar Toggle Button */}
           <button
-            onClick={handleNewChat}
-            className="w-full mb-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className={`absolute right-1 top-2 p-2 z-50 text-gray-400 hover:text-white
+            rounded-lg hover:bg-gray-800 transition-colors`}
+            title={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
           >
-            New Chat
+            <HiMenuAlt2 size={24} />
           </button>
-          <h2 className="text-sm font-semibold text-gray-400 mb-4">
-            Chat History
-          </h2>
-          <div className="space-y-2">
-            {conversations.map((conv) => (
-              <div
-                key={conv.id}
-                onClick={() => handleChatSelect(conv)}
-                className={`p-3 hover:bg-gray-800 rounded-lg cursor-pointer ${
-                  currentChat.id === conv.id ? "bg-gray-800" : ""
-                }`}
+
+          {/* Sidebar Content - Add opacity transition */}
+          <div
+            className={`transition-opacity duration-300 ${
+              isSidebarOpen ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <div className="p-4 border-b border-gray-800">
+              <Link to="/" className="flex flex-col items-start gap-2">
+                <h1 className="text-base sm:text-xl font-bold text-white">
+                  Soulcare
+                </h1>
+              </Link>
+            </div>
+            <div className="p-4">
+              <button
+                onClick={handleNewChat}
+                className="w-full mb-4 py-2 text-white rounded-lg
+                bg-gradient-to-r from-[#B44BF2] to-[#7B68EE]
+                hover:from-[#a043d9] hover:to-[#6f5dd4]
+                transition-all duration-200"
               >
-                <p className="text-white text-sm">{conv.title}</p>
-                <p className="text-gray-400 text-xs">{conv.preview}</p>
+                New Chat
+              </button>
+              <h2 className="text-xs sm:text-sm font-semibold text-gray-400 mb-4">
+                Chat History
+              </h2>
+              <div className="space-y-2">
+                {conversations.map((conv) => (
+                  <div
+                    key={conv.id}
+                    onClick={() => handleChatSelect(conv)}
+                    className={`p-3 hover:bg-gray-800 rounded-lg cursor-pointer ${
+                      currentChat.id === conv.id ? "bg-gray-800" : ""
+                    }`}
+                  >
+                    <p className="text-xs sm:text-sm text-white">
+                      {conv.title}
+                    </p>
+                    <p className="text-xs text-gray-400">{conv.preview}</p>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col ml-80">  
-        {/* Header */}
-        <div className="flex justify-between items-center p-4 border-b border-gray-800">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate(-1)}
-              className="text-gray-400 hover:text-white flex items-center gap-2"
-            >
-              <span>←</span> Back
-            </button>
-            <h2 className="text-xl font-bold text-white">
+        {/* Main Chat Area */}
+        <div
+          className={`flex-1 flex flex-col transition-all duration-300
+        ${isSidebarOpen ? "ml-80" : "ml-10"}`}
+        >
+          {/* Header */}
+          <div className="flex justify-between items-center mx-2 p-2 border-b border-gray-800">
+            <h2 className="hidden sm:block text-base sm:text-xl font-bold text-white">
               Your AI Companion for Mental Wellness
             </h2>
+            <Link to="/" className="flex flex-col items-start gap-2">
+              <img
+                src="/soul2.png"
+                alt="Soulcare Logo"
+                className="h-10 sm:h-14 w-auto hover:opacity-80 transition-opacity "
+              />
+            </Link>
           </div>
-        </div>
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          <p className="text-center text-sm text-gray-500">
-            Your conversations are private and secure.
-          </p>
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`flex ${
-                message.role === "user" ? "justify-end" : "justify-start"
-              }`}
-            >
-              {message.role === "assistant" && (
-                <div className="w-8 h-8 rounded-full bg-purple-600 mr-3 flex-shrink-0" />
-              )}
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            {messages.map((message, index) => (
               <div
-                className={`max-w-[70%] rounded-2xl p-4 ${
-                  message.role === "user"
-                    ? "bg-purple-600 text-white"
-                    : "bg-[#1E1E1E] text-white"
+                key={index}
+                className={`flex ${
+                  message.role === "user" ? "justify-end" : "justify-start"
                 }`}
               >
-                {message.content}
-              </div>
-            </div>
-          ))}
-          {isLoading && (
-            <div className="flex justify-start">
-              <div className="w-8 h-8 rounded-full bg-purple-600 mr-3 flex-shrink-0" />
-              <div className="max-w-[70%] rounded-2xl p-4 bg-[#1E1E1E] text-white">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" />
-                  <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce [animation-delay:-.3s]" />
-                  <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce [animation-delay:-.5s]" />
+                {message.role === "assistant" && (
+                  <img
+                    src="/soul2.png"
+                    alt="AI Avatar"
+                    className="w-8 h-8 rounded-full mr-3 flex-shrink-0 bg-purple-300 p-1"
+                  />
+                )}
+                <div
+                  className={`max-w-[70%] rounded-2xl p-4 ${
+                    message.role === "user"
+                      ? "bg-purple-600 text-white"
+                      : "bg-[#1E1E1E] text-white"
+                  }`}
+                >
+                  <div className="text-xs sm:text-base">{message.content}</div>
                 </div>
               </div>
-            </div>
-          )}
-        </div>
+            ))}
+            {isLoading && (
+              <div className="flex justify-start">
+                <img
+                  src="/soul2.png"
+                  alt="AI Avatar"
+                  className="w-8 h-8 rounded-full mr-3 flex-shrink-0 bg-purple-300/30 p-1"
+                />
+                <div className="max-w-[70%] rounded-2xl p-4 bg-[#1E1E1E] text-white">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" />
+                    <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce [animation-delay:-.3s]" />
+                    <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce [animation-delay:-.5s]" />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
 
-        {/* Input Area */}
-        <div className="fixed bottom-0 left-80 right-0 p-4 border-t border-gray-800 bg-[#0A0A0A]">
-          <div className="max-w-4xl mx-auto relative">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleSend()}
-              placeholder="Type your message..."
-              className="w-full bg-[#1E1E1E] text-white rounded-xl px-4 py-3 pr-20 focus:outline-none focus:ring-2 focus:ring-purple-600"
-              disabled={isLoading}
-            />
-            <button
-              onClick={handleSend}
-              disabled={isLoading}
-              className={`absolute right-2 top-1/2 transform -translate-y-1/2 bg-purple-600 text-white px-4 py-1 rounded-lg ${
-                isLoading
-                  ? "opacity-50 cursor-not-allowed"
-                  : "hover:bg-purple-700"
-              }`}
-            >
-              Send
-            </button>
+          {/* Input Area */}
+          <div
+            className={`fixed bottom-0 right-0 p-4 border-t border-gray-800 
+        bg-[#0A0A0A] transition-all duration-300
+        ${isSidebarOpen ? "left-80" : "left-0"}`}
+          >
+            <div className="max-w-4xl mx-auto relative">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleSend()}
+                placeholder="Type your message..."
+                className="w-full bg-[#1E1E1E] text-white rounded-xl px-4 py-3 pr-20 focus:outline-none focus:ring-2 focus:ring-purple-600 text-xs sm:text-base"
+                disabled={isLoading}
+              />
+              <button
+                onClick={handleSend}
+                disabled={isLoading}
+                className={`absolute right-2 top-1/2 transform -translate-y-1/2 bg-purple-600 text-white px-4 py-1 rounded-lg text-xs sm:text-base ${
+                  isLoading
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-purple-700"
+                }`}
+              >
+                Send
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
