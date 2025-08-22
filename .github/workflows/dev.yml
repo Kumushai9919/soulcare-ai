@@ -29,11 +29,14 @@ jobs:
 
       # Step 3: Install dependencies
       - name: 📦 Install Dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --no-frozen-lockfile 
+
 
       # Step 4: Build the project
       - name: 🛠️ Build Project
-        run: pnpm run build   
+        run: pnpm run build    
+        env:
+          VITE_GEMINI_PROXY_URL: ${{ secrets.VITE_GEMINI_PROXY_URL_DEV }}
 
       # Step 5: Deploy to the server
       - name: 📤 Deploy to Test Domain 

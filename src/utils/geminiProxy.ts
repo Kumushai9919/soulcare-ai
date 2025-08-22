@@ -23,18 +23,40 @@ export const generateChatResponse = async (prompt: string): Promise<string> => {
     return "You've reached your daily limit. Please try again tomorrow!";
   }
 
-  try { 
-    const res = await fetch(`${import.meta.env.VITE_GEMINI_PROXY_URL}/api/chatbot`, {
+  try {
+    // Validate API URL
+    const apiUrl = import.meta.env.VITE_GEMINI_PROXY_URL;
+    if (!apiUrl) {
+      throw new Error('API URL not configured');
+    }
+
+    const res = await fetch(`${apiUrl}/api/chatbot`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
       body: JSON.stringify({ prompt }),
     });
 
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+
+    const contentType = res.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error("Server didn't return JSON");
+    }
+
     const data = await res.json();
     return data.text || "No response from Gemini.";
-  } catch (error) {
-    console.error("Gemini Proxy Error:", error);
-    return "😪 AI is sleeping. Try again later!";
+  } catch (error: any) {
+    console.error("Gemini Proxy Error Details:", {
+      message: error.message,
+      url: import.meta.env.VITE_GEMINI_PROXY_URL,
+      status: error.status
+    });
+    return "Server connection error. Please check your API configuration.";
   }
 };
 

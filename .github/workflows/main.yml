@@ -34,6 +34,9 @@ jobs:
       # Step 4: Build the project
       - name: 🛠️ Build Project
         run: pnpm run build  
+        env:
+          VITE_GEMINI_PROXY_URL: ${{ secrets.VITE_GEMINI_PROXY_URL_PROD }}
+
 
       # Step 5: Deploy to the server
       - name: 📤 Deploy to Production Domain

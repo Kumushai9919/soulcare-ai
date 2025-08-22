@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation, Link } from "react-router-dom";
 import {
   generateChatResponse,
@@ -7,17 +7,20 @@ import {
 } from "../../utils/geminiProxy";
 import { saveChat, getAllChats, createNewChat } from "../../utils/chatStorage";
 import type { Message, Conversation } from "../../type/chat";
-import { HiMenuAlt2 } from "react-icons/hi";
-import Toast from "../../components/Toast";
+import { HiMenuAlt2, HiPaperAirplane, HiX } from "react-icons/hi";
+import Toast from "../../components/features/Toast";
 
 interface Props {
   onBack: () => void;
 }
 
 const ChatInterface = ({}: Props) => {
-  const location = useLocation(); 
+  const location = useLocation();
   const topic = location.state?.topic;
-
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputContainerRef = useRef<HTMLDivElement>(null);
+  
   // Initialize sidebar state from navigation
   const [isSidebarOpen, setIsSidebarOpen] = useState(
     location.state?.sidebarOpen ?? true
@@ -35,7 +38,6 @@ const ChatInterface = ({}: Props) => {
   const [conversations, setConversations] = useState<Conversation[]>(() =>
     getAllChats()
   );
-
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -44,13 +46,36 @@ const ChatInterface = ({}: Props) => {
       timestamp: new Date(),
     },
   ]);
-
   const [input, setInput] = useState("");
   const [showToast, setShowToast] = useState(false);
 
-  useEffect(() => { 
+  useEffect(() => {
     setShowToast(true);
   }, []);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+ 
+  // Handle mobile focus - prevent zoom and scroll input into view
+  const handleInputFocus = () => {
+    // Prevent iOS zoom on input focus
+    const viewport = document.querySelector('meta[name="viewport"]');
+    if (viewport) {
+      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+    }
+    
+    setTimeout(() => {
+      if (inputContainerRef.current) {
+        inputContainerRef.current.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'end' 
+        });
+      }
+    }, 100);
+  };
 
   useEffect(() => {
     const initializeTopicChat = async () => {
@@ -87,19 +112,23 @@ const ChatInterface = ({}: Props) => {
 
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
+    
+    // Reset textarea height
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
+    
     setIsLoading(true);
 
     try {
-      const contextPrompt = `You are an empathetic and professional therapist. 
-        Previous conversation context: ${messages
-          .slice(-3)
-          .map((m) => `${m.role}: ${m.content}`)
-          .join("\n")}
-        User's message: ${input}
-        Provide a therapeutic, supportive response that shows understanding and offers guidance:`;
+      const contextPrompt = `You are an empathetic and professional therapist. Previous conversation context: ${messages
+        .slice(-3)
+        .map((m) => `${m.role}: ${m.content}`)
+        .join("\n")}
+      User's message: ${input}
+      Provide a therapeutic, supportive response that shows understanding and offers guidance:`;
 
       const aiResponse = await generateChatResponse(contextPrompt);
-
       const botMessage: Message = {
         role: "assistant",
         content: aiResponse,
@@ -107,8 +136,10 @@ const ChatInterface = ({}: Props) => {
       };
 
       setMessages((prev) => [...prev, botMessage]);
+
       // Save chat after each message
       saveChat(currentChat, [...messages, userMessage, botMessage]);
+
       // Update conversations list
       setConversations(getAllChats());
     } catch (error) {
@@ -131,6 +162,10 @@ const ChatInterface = ({}: Props) => {
       setCurrentChat(savedChat);
       setMessages(savedChat.messages);
     }
+    // Close sidebar on mobile after selection
+    if (window.innerWidth < 768) {
+      setIsSidebarOpen(false);
+    }
   };
 
   const handleNewChat = () => {
@@ -144,71 +179,94 @@ const ChatInterface = ({}: Props) => {
         timestamp: new Date(),
       },
     ]);
+    // Close sidebar on mobile after creating new chat
+    if (window.innerWidth < 768) {
+      setIsSidebarOpen(false);
+    }
   };
 
   return (
     <>
+      {/* Viewport meta fix for mobile */}
+      <style>{`
+        html {
+          font-size: 16px !important;
+         
+        }
+        input, textarea {
+          font-size: 16px !important;
+
+        }
+        @media screen and (max-width: 768px) {
+          .mobile-input {
+            font-size: 16px !important;
+            transform: none !important;
+          }
+        }
+      `}</style>
+      
       <Toast
         message={`You have ${getRemainingRequests()} daily AI chat requests remaining.`}
         isVisible={showToast}
         onClose={() => setShowToast(false)}
       />
-      <div className="flex h-screen bg-[#0A0A0A] pt-6 overflow-hidden">
+      
+      <div className="flex h-screen bg-[#0A0A0A] overflow-hidden" style={{ minHeight: '100vh', maxHeight: '100vh' }}>
+        {/* Mobile Overlay */}
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+
         {/* Sidebar */}
         <div
-          className={`w-80 border-r border-gray-800 fixed top-6 bottom-0 
-        transition-all duration-300 overflow-hidden
-        ${isSidebarOpen ? "left-0" : "-left-[calc(320px-2.5rem)]"}`}
+          className={`w-80 md:w-64 bg-[#0A0A0A] border-r border-gray-800 fixed md:relative top-0 bottom-0 transition-transform duration-300 z-50 ${
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+          } ${isSidebarOpen ? "md:block" : "md:hidden"}`}
         >
-          {/* Sidebar Toggle Button */}
+          {/* Mobile close button */}
           <button
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className={`absolute right-1 top-2 p-2 z-50 text-gray-400 hover:text-white
-            rounded-lg hover:bg-gray-800 transition-colors`}
-            title={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+            onClick={() => setIsSidebarOpen(false)}
+            className="absolute right-4 top-4 p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800 transition-colors md:hidden"
           >
-            <HiMenuAlt2 size={24} />
+            <HiX size={20} />
           </button>
 
-          {/* Sidebar Content - Add opacity transition */}
-          <div
-            className={`transition-opacity duration-300 ${
-              isSidebarOpen ? "opacity-100" : "opacity-0"
-            }`}
-          >
+          {/* Sidebar Content */}
+          <div className="h-full flex flex-col">
             <div className="p-4 border-b border-gray-800">
               <Link to="/" className="flex flex-col items-start gap-2">
-                <h1 className="text-base sm:text-xl font-bold text-white">
+                <h1 className="font-mono text-lg md:text-xl font-bold text-white">
                   Soulcare
                 </h1>
               </Link>
             </div>
-            <div className="p-4">
+            
+            <div className="flex-1 overflow-y-auto p-4">
               <button
                 onClick={handleNewChat}
-                className="w-full mb-4 py-2 text-white rounded-lg
-                bg-gradient-to-r from-[#B44BF2] to-[#7B68EE]
-                hover:from-[#a043d9] hover:to-[#6f5dd4]
-                transition-all duration-200"
+                className="w-full font-mono mb-4 py-3 text-white rounded-lg bg-gradient-to-r from-[#B44BF2] to-[#7B68EE] hover:from-[#a043d9] hover:to-[#6f5dd4] transition-all duration-200 font-medium"
               >
                 New Chat
               </button>
-              <h2 className="text-xs sm:text-sm font-semibold text-gray-400 mb-4">
+              
+              <h2 className="text-sm font-semibold text-gray-400 mb-4 font-mono">
                 Chat History
               </h2>
+              
               <div className="space-y-2">
                 {conversations.map((conv) => (
                   <div
                     key={conv.id}
                     onClick={() => handleChatSelect(conv)}
-                    className={`p-3 hover:bg-gray-800 rounded-lg cursor-pointer ${
+                    className={`p-3 hover:bg-gray-800 rounded-lg cursor-pointer transition-colors  ${
                       currentChat.id === conv.id ? "bg-gray-800" : ""
                     }`}
                   >
-                    <p className="text-xs sm:text-sm text-white">
-                      {conv.title}
-                    </p>
-                    <p className="text-xs text-gray-400">{conv.preview}</p>
+                    <p className="text-sm text-white truncate">{conv.title}</p>
+                    <p className="text-xs text-gray-400 truncate">{conv.preview}</p>
                   </div>
                 ))}
               </div>
@@ -217,96 +275,129 @@ const ChatInterface = ({}: Props) => {
         </div>
 
         {/* Main Chat Area */}
-        <div className={`flex-1 flex flex-col transition-all duration-300
-          ${isSidebarOpen ? 'ml-80' : 'ml-10'}`}>
+        <div className="flex-1 flex flex-col min-w-0 relative">
           {/* Fixed Header */}
-          <div className={`fixed top-6 right-0 z-40 flex justify-between items-center px-4 py-3 
-            border-b border-gray-800 bg-[#0A0A0A] transition-all duration-300
-            ${isSidebarOpen ? 'left-80' : 'left-10'}`}>
-            <h2 className="hidden sm:block text-base sm:text-xl font-bold text-white truncate">
-              Your AI Companion for Mental Wellness
-            </h2>
+          <header className="flex justify-between items-center h-12 md:h-16 px-3 md:px-4 border-b border-gray-800 bg-[#0A0A0A] flex-shrink-0 relative z-10">
+            <div className="flex items-center gap-3 min-w-0">
+              <button
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800 transition-colors flex-shrink-0"
+                title={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+              >
+                <HiMenuAlt2 size={20} />
+              </button>
+              <h2 className="hidden sm:block text-sm md:text-lg font-mono text-white/90 truncate">
+                Your AI Companion for Mental Wellness
+              </h2>
+            </div>
+            
             <Link to="/" className="flex-shrink-0">
               <img
                 src="/soul2.png"
                 alt="Soulcare Logo"
-                className="h-8 sm:h-10 w-auto hover:opacity-80 transition-opacity"
+                className="h-8 md:h-12 w-auto hover:opacity-80 transition-opacity"
               />
             </Link>
-          </div>
+          </header>
 
-          {/* Messages - Add top padding to account for fixed header */}
-          <div className="flex-1 overflow-y-auto pt-16 px-4 pb-20">
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                className={`flex ${index === 0 ? 'mt-6' : ''} ${
-                  message.role === "user" ? "justify-end" : "justify-start"
-                }`}
-              >
-                {message.role === "assistant" && (
+          {/* Messages Container - Scrollable */}
+          <div className="flex-1 overflow-y-auto overscroll-behavior-none">
+            <div className="px-3 md:px-4 py-4 max-w-4xl mx-auto">
+              {messages.map((message, index) => (
+                <div
+                  key={index}
+                  className={`flex mb-4 ${
+                    message.role === "user" ? "justify-end" : "justify-start"
+                  }`}
+                >
+                  {message.role === "assistant" && (
+                    <img
+                      src="/soul2.png"
+                      alt="AI Avatar"
+                      className="w-6 h-6 md:w-8 md:h-8 rounded-full mr-2 md:mr-3 flex-shrink-0 bg-purple-300 p-1 mt-1"
+                    />
+                  )}
+                  <div
+                    className={`max-w-[85%] md:max-w-[70%] rounded-2xl p-3 md:p-4 ${
+                      message.role === "user"
+                        ? "bg-purple-600 text-white"
+                        : "bg-[#1E1E1E] text-white"
+                    }`}
+                  >
+                    <div className="text-sm md:text-base leading-relaxed whitespace-pre-wrap">
+                      {message.content}
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+              {isLoading && (
+                <div className="flex justify-start mb-4">
                   <img
                     src="/soul2.png"
                     alt="AI Avatar"
-                    className="w-8 h-8 rounded-full mr-3 flex-shrink-0 bg-purple-300 p-1"
+                    className="w-6 h-6 md:w-8 md:h-8 rounded-full mr-2 md:mr-3 flex-shrink-0 bg-purple-300/30 p-1 mt-1"
                   />
-                )}
-                <div
-                  className={`max-w-[70%] rounded-2xl p-4 ${
-                    message.role === "user"
-                      ? "bg-purple-600 text-white"
-                      : "bg-[#1E1E1E] text-white"
-                  }`}
-                >
-                  <div className="text-xs sm:text-base">{message.content}</div>
-                </div>
-              </div>
-            ))}
-            {isLoading && (
-              <div className="flex justify-start">
-                <img
-                  src="/soul2.png"
-                  alt="AI Avatar"
-                  className="w-8 h-8 rounded-full mr-3 flex-shrink-0 bg-purple-300/30 p-1"
-                />
-                <div className="max-w-[70%] rounded-2xl p-4 bg-[#1E1E1E] text-white">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" />
-                    <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce [animation-delay:-.3s]" />
-                    <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce [animation-delay:-.5s]" />
+                  <div className="max-w-[85%] md:max-w-[70%] rounded-2xl p-3 md:p-4 bg-[#1E1E1E] text-white">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" />
+                      <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce [animation-delay:-.3s]" />
+                      <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce [animation-delay:-.5s]" />
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+              <div ref={messagesEndRef} className="h-4" />
+            </div>
           </div>
 
           {/* Fixed Input Area */}
-          <div className={`fixed bottom-0 right-0 p-4 border-t border-gray-800 
-          bg-[#0A0A0A] transition-all duration-300
-          ${isSidebarOpen ? 'left-80' : 'left-0'}`}>
-            <div className="max-w-4xl mx-auto flex items-center gap-2">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleSend()}
-                placeholder="Type your message..."
-                className="flex-1 bg-[#1E1E1E] text-white rounded-xl px-4 py-3 
-                focus:outline-none focus:ring-2 focus:ring-purple-600 
-                text-xs sm:text-base"
-                disabled={isLoading}
-              />
-              <button
-                onClick={handleSend}
-                disabled={isLoading}
-                className={`flex-shrink-0 bg-purple-600 text-white px-4 py-3 
-                rounded-xl text-xs sm:text-base transition-colors
-                ${isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-purple-700"}`}
-              >
-                Send
-              </button>
+          <div 
+            ref={inputContainerRef}
+            className="border-t border-gray-800 bg-[#0A0A0A] flex-shrink-0 relative z-10"
+          >
+            <div className="p-2 sm:p-3 md:p-4">
+              <div className="max-w-4xl mx-auto">
+                <div className="flex items-center gap-2 bg-[#1E1E1E] rounded-full px-3 py-2 md:px-4 md:py-3">
+                  <div className="flex-1 min-w-0">
+                    <input
+                      type="text"
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onFocus={handleInputFocus}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSend();
+                        }
+                      }}
+                      placeholder="Type your message..."
+                      className="w-full bg-transparent text-white focus:outline-none text-base md:text-base placeholder-gray-400 mobile-input"
+                      style={{ fontSize: '16px' }}
+                      disabled={isLoading}
+                      autoComplete="off"
+                      autoCorrect="off"
+                      autoCapitalize="off"
+                      spellCheck="false"
+                    />
+                  </div>
+                  <button
+                    onClick={handleSend}
+                    disabled={isLoading || !input.trim()}
+                    className={`flex-shrink-0 w-8 h-8 md:w-9 md:h-9 rounded-full transition-all duration-200 flex items-center justify-center ${
+                      input.trim() && !isLoading
+                        ? "bg-purple-600 hover:bg-purple-700 text-white"
+                        : "bg-gray-600 text-gray-400 cursor-not-allowed"
+                    }`}
+                    type="button"
+                  >
+                    <HiPaperAirplane
+                      className="w-4 h-4 transform rotate-90"
+                    />
+                  </button>
+                </div>
+              </div>
             </div>
-
           </div>
         </div>
       </div>
@@ -315,3 +406,5 @@ const ChatInterface = ({}: Props) => {
 };
 
 export default ChatInterface;
+ 
+ 
