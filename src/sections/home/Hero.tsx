@@ -68,10 +68,10 @@ export default function Hero({ onStartChat }: FeaturesProps) {
           animate="show">
           {/* Initial Welcome with Quote */}
           <motion.div className="mb-16 relative w-full" variants={itemVariants}>
-            <div className="relative pt-16 sm:pt-24">
+            <div className="relative pt-16 mt-6 sm:pt-24">
               {/* Quote positioned higher */}
               <motion.div
-                className="font-sans absolute -top-8 sm:-top-12 right-0 sm:right-4 max-w-[200px] sm:max-w-xs text-right "
+                className="font-sans absolute -top-0 sm:-top-12 right-0 sm:right-4 max-w-[200px] sm:max-w-xs text-right "
                 variants={itemVariants}
               >
                 <p className="text-white/90  text-md sm:text-2xl italic font-light leading-relaxed">

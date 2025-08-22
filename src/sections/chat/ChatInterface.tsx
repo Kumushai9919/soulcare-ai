@@ -58,17 +58,7 @@ const ChatInterface = ({}: Props) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Handle textarea auto-resize
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(e.target.value);
-    
-    // Auto-resize textarea
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 100)}px`;
-    }
-  };
-
+ 
   // Handle mobile focus - prevent zoom and scroll input into view
   const handleInputFocus = () => {
     // Prevent iOS zoom on input focus
