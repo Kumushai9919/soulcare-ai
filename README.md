@@ -16,16 +16,16 @@ A modern web application providing personalized mental wellness support through 
 - 🔒 Rate limiting and usage tracking for API calls
 
 <div align="center">
-  <img src="public/soulcaremd.png" alt="Soulcare Screenshot" width="400" style="border-radius: 10px; margin: 20px 0;">
+  <img src="public/soulcaremd.png" alt="Soulcare Screenshot" width="700" style="border-radius: 10px; margin: 20px 0;">
 </div>
 <div align="center">
-  <img src="public/soulcaremd2.png" alt="Soulcare Screenshot" width="400" style="border-radius: 10px; margin: 20px 0;">
+  <img src="public/soulcaremd2.png" alt="Soulcare Screenshot" width="700" style="border-radius: 10px; margin: 20px 0;">
 </div>
 <div align="center">
-  <img src="public/soulcaremd3.png" alt="Soulcare Screenshot" width="400" style="border-radius: 10px; margin: 20px 0;">
+  <img src="public/soulcaremd3.png" alt="Soulcare Screenshot" width="700" style="border-radius: 10px; margin: 20px 0;">
 </div>
 <div align="center">
-  <img src="public/soulcaremd4.png" alt="Soulcare Screenshot" width="400" style="border-radius: 10px; margin: 20px 0;">
+  <img src="public/soulcaremd4.png" alt="Soulcare Screenshot" width="700" style="border-radius: 10px; margin: 20px 0;">
 </div>
 
 ## Tech Stack
