@@ -19,7 +19,7 @@ const Toast = ({ message, isVisible, onClose }: ToastProps) => {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed top-4 right-4 z-50">
+    <div className="fixed top-4 right-4 z-[99]">
       <div className="bg-[#0A0A0A] text-white px-6 py-3 rounded-lg shadow-lg 
         border border-gray-400 text-sm">
         {message}
